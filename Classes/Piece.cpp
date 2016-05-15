@@ -82,3 +82,29 @@ void Piece::setUpPiece(ColorType type)
         this->addChild(_pieceSpr);
     }
 }
+
+//点数を返す
+int Piece::getPoint()
+{
+    int point = 0;
+    
+    //一旦、カラータイプで点数わけ
+    switch (_colorType) {
+        case BLUE:
+            point = 10;
+            break;
+            
+        case GREEN:
+            point = 20;
+            break;
+        
+        case RED:
+            point = 30;
+            break;
+            
+        default:
+            break;
+    }
+    
+    return point;
+}

@@ -34,6 +34,9 @@ public:
     //ボール生成
     void setUpPiece(ColorType type);
     
+    //点数を返す処理
+    int getPoint();
+    
 private:
     ColorType _colorType;
     cocos2d::Sprite* _pieceSpr;

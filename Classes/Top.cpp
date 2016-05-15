@@ -29,6 +29,8 @@ Top::Top()
 , _firstTapPos(0,0)
 , _piece(nullptr)
 , _gameOverLabel(nullptr)
+, _point(0)
+, _scoreLabel(nullptr)
 {
     if(_pieceMap.size() > 0)
     {
@@ -125,6 +127,9 @@ void Top::onEnter()
         
         this->addChild(_backGround);
     }
+    
+    //点数表示
+    this->setPoint();
     
     //block
     this->setBlock();
@@ -535,6 +540,11 @@ bool Top::isCrash()
            && ballPos.y >= piecePos.y
            && ballPos.y <= piecePos.y + pieceSize.height)
         {
+            //点数加算＆更新
+            _point = _point + _pieceMap[i]->getPoint();
+            this->setPoint();
+            
+            //消す
             _pieceMap[i]->removeFromParent();
             _pieceMap.erase(_pieceMap.begin() + i);
             
@@ -625,5 +635,24 @@ void Top::reset()
     //_state戻す
     _state = NOMAL;
     
+    //点数0に戻す
+    _point = 0;
+    this->setPoint();
+    
     Top::onEnter();
+}
+
+//点数更新
+void Top::setPoint()
+{
+    if(_scoreLabel)
+    {
+        _scoreLabel->removeFromParent();
+        _scoreLabel = nullptr;
+    }
+    
+    _scoreLabel = Label::createWithSystemFont(StringUtils::format("Score: %d", _point), "HiraKakuProN-W6", 10);
+    _scoreLabel->setPosition(Point(_origin.x + _visibleSize.width / 2,
+                                  (_origin.y + _visibleSize.height) * 0.95));
+    this->addChild(_scoreLabel);
 }

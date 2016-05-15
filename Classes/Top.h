@@ -71,6 +71,10 @@ public:
     bool isCrash();
 
 private:
+    //点数更新
+    void setPoint();
+
+private:
     State _state;
     
     cocos2d::Size _visibleSize;
@@ -88,6 +92,10 @@ private:
     std::vector<Piece*> _pieceMap;
     
     cocos2d::Label* _gameOverLabel;
+    
+    //点数
+    int _point;
+    cocos2d::Label* _scoreLabel;
 };
 
 #endif /* defined(__breakout__Top__) */
