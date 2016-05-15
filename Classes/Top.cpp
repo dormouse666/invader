@@ -29,8 +29,10 @@ Top::Top()
 , _firstTapPos(0,0)
 , _piece(nullptr)
 , _gameOverLabel(nullptr)
-, _point(0)
+, _score(0)
 , _scoreLabel(nullptr)
+, _highScore(0) //TODO:保存しといたやつ入れる
+, _highScoreLabel(nullptr)
 {
     if(_pieceMap.size() > 0)
     {
@@ -129,7 +131,8 @@ void Top::onEnter()
     }
     
     //点数表示
-    this->setPoint();
+    this->setScore();
+    this->setHighScore();
     
     //block
     this->setBlock();
@@ -541,8 +544,15 @@ bool Top::isCrash()
            && ballPos.y <= piecePos.y + pieceSize.height)
         {
             //点数加算＆更新
-            _point = _point + _pieceMap[i]->getPoint();
-            this->setPoint();
+            _score = _score + _pieceMap[i]->getPoint();
+            this->setScore();
+            
+            //ハイスコア更新
+            if(_score > _highScore)
+            {
+                _highScore = _score;
+                this->setHighScore();
+            }
             
             //消す
             _pieceMap[i]->removeFromParent();
@@ -636,14 +646,14 @@ void Top::reset()
     _state = NOMAL;
     
     //点数0に戻す
-    _point = 0;
-    this->setPoint();
+    _score = 0;
+    this->setScore();
     
     Top::onEnter();
 }
 
 //点数更新
-void Top::setPoint()
+void Top::setScore()
 {
     if(_scoreLabel)
     {
@@ -651,8 +661,23 @@ void Top::setPoint()
         _scoreLabel = nullptr;
     }
     
-    _scoreLabel = Label::createWithSystemFont(StringUtils::format("Score: %d", _point), "HiraKakuProN-W6", 10);
+    _scoreLabel = Label::createWithSystemFont(StringUtils::format("Score: %d", _score), "HiraKakuProN-W6", 10);
     _scoreLabel->setPosition(Point(_origin.x + _visibleSize.width / 2,
-                                  (_origin.y + _visibleSize.height) * 0.95));
+                                  (_origin.y + _visibleSize.height) * 0.98));
     this->addChild(_scoreLabel);
+}
+
+//ハイスコア更新
+void Top::setHighScore()
+{
+    if(_highScoreLabel)
+    {
+        _highScoreLabel->removeFromParent();
+        _highScoreLabel = nullptr;
+    }
+    
+    _highScoreLabel = Label::createWithSystemFont(StringUtils::format("HighScore: %d", _highScore), "HiraKakuProN-W6", 10);
+    _highScoreLabel->setPosition(Point(_origin.x + _visibleSize.width / 2,
+                                   (_origin.y + _visibleSize.height) * 0.93));
+    this->addChild(_highScoreLabel);
 }

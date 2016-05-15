@@ -72,7 +72,8 @@ public:
 
 private:
     //点数更新
-    void setPoint();
+    void setScore();
+    void setHighScore();
 
 private:
     State _state;
@@ -94,8 +95,10 @@ private:
     cocos2d::Label* _gameOverLabel;
     
     //点数
-    int _point;
+    int _score;
     cocos2d::Label* _scoreLabel;
+    int _highScore;
+    cocos2d::Label* _highScoreLabel;
 };
 
 #endif /* defined(__breakout__Top__) */
