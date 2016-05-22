@@ -102,6 +102,14 @@ private:
     
     //アプリに保存する情報
     cocos2d::UserDefault* _userDefault;
+    
+    //敵がどっち方向に進んでるか
+    enum EnemyMove {
+        RIGHT,
+        LEFT,
+    };
+    
+    EnemyMove _enemyMove;
 };
 
 #endif /* defined(__breakout__Top__) */

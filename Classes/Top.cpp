@@ -39,6 +39,7 @@ Top::Top()
 , _highScore(0)
 , _highScoreLabel(nullptr)
 , _userDefault(nullptr)
+, _enemyMove(RIGHT)
 {
     if(_pieceMap.size() > 0)
     {
@@ -276,7 +277,43 @@ void Top::update(float dt)
     //CCLOG("rightPos: %f", rightPos);
     //CCLOG("leftPos: %f", leftPos);
     
-    //動かす
+    //敵動く
+    for(auto piece : _pieceMap)
+    {
+        if (_enemyMove == RIGHT)
+        {
+            //どっかが右限界に行ってないか確認
+            if(rightPos < piece->getPositionX() + piece->getContentSize().width + 1)
+            {
+                _enemyMove = LEFT;
+                break;
+            }
+        }
+        else if(_enemyMove == LEFT)
+        {
+            //左限界に行ってないか確認
+            if(leftPos > piece->getPositionX() - 1)
+            {
+                _enemyMove = RIGHT;
+                break;
+            }
+        }
+    }
+    
+    //雑に動かす　ちょっと動きが滑らか過ぎる。。
+    for(auto piece : _pieceMap)
+    {
+        if (_enemyMove == RIGHT)
+        {
+            piece->setPositionX(piece->getPositionX() + 1);
+        }
+        else if(_enemyMove == LEFT)
+        {
+            piece->setPositionX(piece->getPositionX() - 1);
+        }
+    }
+    
+    //ボールを動かす
     _ball->setPosition(_ball->getPosition().x + _ball->getHorizonLength(),
                         _ball->getPosition().y + _ball->getVerticalLength());
     
@@ -499,7 +536,7 @@ void Top::setBlock()
     }
     
     //ブロック作成（仮）
-    for(int i = 0; i < 15; i++)
+    for(int i = 0; i < 8; i++)
     {
         _piece = Piece::create();
         
@@ -535,7 +572,7 @@ void Top::setBlock()
         _piece->setPoint(point);
         
         auto pieceSize = _piece->getContentSize();
-        _piece->setPosition((_backGround->getPosition().x - _backGround->getContentSize().width / 2) + pieceSize.width * i,
+        _piece->setPosition((_backGround->getPosition().x - _backGround->getContentSize().width / 2) + pieceSize.width * i + i*5, //ちょっと隙間開ける(5)
                             _origin.y + _visibleSize.height / 2); //だいぶ適当
         
         //マップに入れる
