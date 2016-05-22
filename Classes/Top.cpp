@@ -20,6 +20,7 @@ namespace  {
     static const char* HIGH_SCORE_NAME = "highScore";
     static const float ENEMY_MOVE_INTERVAL_DEFAULT = 1.0f;
     static const int ENEMY_MOVE_DISTANCE = 3;
+    static const float ENEMY_WIDTH = 10.0f;
 }
 
 
@@ -546,7 +547,7 @@ void Top::setBlock()
         _piece->setPoint(point);
         
         auto pieceSize = _piece->getContentSize();
-        _piece->setPosition((_backGround->getPosition().x - _backGround->getContentSize().width / 2) + pieceSize.width * i + i*5, //ちょっと隙間開ける(5)
+        _piece->setPosition((_backGround->getPosition().x - _backGround->getContentSize().width / 2) + ENEMY_WIDTH * i + i*5, //ちょっと隙間開ける(5)
                             _origin.y + _visibleSize.height / 2); //だいぶ適当
         
         //マップに入れる
@@ -770,6 +771,20 @@ void Top::enemyMove()
             {
                 piece->setPositionX(piece->getPositionX() - ENEMY_MOVE_DISTANCE);
             }
+            
+            //見た目も変えるぞ
+            auto lookState = piece->getLookState();
+            switch (lookState) {
+                case Piece::LookState::HANDS_UP:
+                    piece->setLookState(Piece::LookState::HANDS_DOWN);
+                    break;
+                case Piece::LookState::HANDS_DOWN:
+                    piece->setLookState(Piece::LookState::HANDS_UP);
+                    break;
+                default:
+                    break;
+            }
+            piece->lookChange();
         }
         
         _elapse = 0.0f;

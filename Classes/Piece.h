@@ -20,6 +20,11 @@ public:
         RED,
     };
     
+    enum LookState {
+        HANDS_UP,
+        HANDS_DOWN,
+    };
+    
 public:
     
     Piece();
@@ -38,9 +43,15 @@ public:
     int getPoint(){return _point;};
     void setPoint(int point){_point = point;};
     
+    //見た目
+    LookState getLookState(){return _lookState;};
+    void setLookState(LookState lookState){_lookState = lookState;};
+    void lookChange();
+    
 private:
     ColorType _colorType;
     int _point;
+    LookState _lookState;
     
     cocos2d::Sprite* _pieceSpr;
 };
