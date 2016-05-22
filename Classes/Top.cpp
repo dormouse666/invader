@@ -13,9 +13,14 @@
 
 USING_NS_CC;
 
-static const double PI = 3.141592653589793;
-static const int LENGTH = 1;
-static const char* PLAYER_IMG_NAME = "images/player.png";
+namespace  {
+    static const double PI = 3.141592653589793;
+    static const int LENGTH = 1;
+    static const char* PLAYER_IMG_NAME = "images/player.png";
+    static const char* HIGH_SCORE_NAME = "highScore";
+}
+
+
 
 // コンストラクタ
 Top::Top()
@@ -31,8 +36,9 @@ Top::Top()
 , _gameOverLabel(nullptr)
 , _score(0)
 , _scoreLabel(nullptr)
-, _highScore(0) //TODO:保存しといたやつ入れる
+, _highScore(0)
 , _highScoreLabel(nullptr)
+, _userDefault(nullptr)
 {
     if(_pieceMap.size() > 0)
     {
@@ -75,6 +81,10 @@ bool Top::init()
 void Top::onEnter()
 {
     Layer::onEnter();
+    
+    //ユーザのハイスコア情報取得
+    _userDefault = UserDefault::getInstance();
+    _highScore = _userDefault->getIntegerForKey(HIGH_SCORE_NAME, 0); //defaultValueが入ってれば無い時はそれをreturnしてくれるぽい？
     
     // 画面サイズ取得
     _visibleSize = Director::getInstance()->getVisibleSize();
@@ -572,6 +582,9 @@ bool Top::isCrash()
             {
                 _highScore = _score;
                 this->setHighScore();
+                
+                //ユーザ情報も更新
+                _userDefault->setIntegerForKey(HIGH_SCORE_NAME, _highScore);
             }
             
             //消す

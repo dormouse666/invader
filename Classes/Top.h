@@ -99,6 +99,9 @@ private:
     cocos2d::Label* _scoreLabel;
     int _highScore;
     cocos2d::Label* _highScoreLabel;
+    
+    //アプリに保存する情報
+    cocos2d::UserDefault* _userDefault;
 };
 
 #endif /* defined(__breakout__Top__) */
