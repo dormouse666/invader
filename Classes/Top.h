@@ -74,6 +74,9 @@ private:
     //点数更新
     void setScore();
     void setHighScore();
+    
+    //敵動かす
+    void enemyMove();
 
 private:
     State _state;
@@ -110,6 +113,10 @@ private:
     };
     
     EnemyMove _enemyMove;
+    
+    //敵の動くタイミング制御
+    float _elapse;
+    float _enemyMoveInterval;
 };
 
 #endif /* defined(__breakout__Top__) */

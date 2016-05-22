@@ -18,6 +18,8 @@ namespace  {
     static const int LENGTH = 1;
     static const char* PLAYER_IMG_NAME = "images/player.png";
     static const char* HIGH_SCORE_NAME = "highScore";
+    static const float ENEMY_MOVE_INTERVAL_DEFAULT = 1.0f;
+    static const int ENEMY_MOVE_DISTANCE = 3;
 }
 
 
@@ -40,6 +42,8 @@ Top::Top()
 , _highScoreLabel(nullptr)
 , _userDefault(nullptr)
 , _enemyMove(RIGHT)
+, _elapse(0.0f)
+, _enemyMoveInterval(ENEMY_MOVE_INTERVAL_DEFAULT)
 {
     if(_pieceMap.size() > 0)
     {
@@ -277,41 +281,11 @@ void Top::update(float dt)
     //CCLOG("rightPos: %f", rightPos);
     //CCLOG("leftPos: %f", leftPos);
     
-    //敵動く
-    for(auto piece : _pieceMap)
-    {
-        if (_enemyMove == RIGHT)
-        {
-            //どっかが右限界に行ってないか確認
-            if(rightPos < piece->getPositionX() + piece->getContentSize().width + 1)
-            {
-                _enemyMove = LEFT;
-                break;
-            }
-        }
-        else if(_enemyMove == LEFT)
-        {
-            //左限界に行ってないか確認
-            if(leftPos > piece->getPositionX() - 1)
-            {
-                _enemyMove = RIGHT;
-                break;
-            }
-        }
-    }
+    //経過時刻
+    _elapse += dt;
     
-    //雑に動かす　ちょっと動きが滑らか過ぎる。。
-    for(auto piece : _pieceMap)
-    {
-        if (_enemyMove == RIGHT)
-        {
-            piece->setPositionX(piece->getPositionX() + 1);
-        }
-        else if(_enemyMove == LEFT)
-        {
-            piece->setPositionX(piece->getPositionX() - 1);
-        }
-    }
+    //敵動く
+    this->enemyMove();
     
     //ボールを動かす
     _ball->setPosition(_ball->getPosition().x + _ball->getHorizonLength(),
@@ -750,4 +724,54 @@ void Top::setHighScore()
     _highScoreLabel->setPosition(Point(_origin.x + _visibleSize.width / 2,
                                    (_origin.y + _visibleSize.height) * 0.93));
     this->addChild(_highScoreLabel);
+}
+
+//敵動かす
+void Top::enemyMove()
+{
+    //右限 TODO:ちょい多くなってきたのでどっかで共通化
+    auto rightPos = _backGround->getPosition().x + _backGround->getContentSize().width/2  - _ball->getContentSize().width/2;
+    //左限
+    auto leftPos = _backGround->getPosition().x - _backGround->getContentSize().width/2 + _ball->getContentSize().width/2;
+    
+    //経過時間がインターバル超えてたら敵動かす
+    if (_elapse >= _enemyMoveInterval)
+    {
+        for(auto piece : _pieceMap)
+        {
+            if (_enemyMove == RIGHT)
+            {
+                //どっかが右限界に行ってないか確認
+                if(rightPos < piece->getPositionX() + piece->getContentSize().width + ENEMY_MOVE_DISTANCE)
+                {
+                    _enemyMove = LEFT;
+                    break;
+                }
+            }
+            else if(_enemyMove == LEFT)
+            {
+                //左限界に行ってないか確認
+                if(leftPos > piece->getPositionX() - ENEMY_MOVE_DISTANCE)
+                {
+                    _enemyMove = RIGHT;
+                    break;
+                }
+            }
+        }
+        
+        //雑に動かす
+        for(auto piece : _pieceMap)
+        {
+            if (_enemyMove == RIGHT)
+            {
+                piece->setPositionX(piece->getPositionX() + ENEMY_MOVE_DISTANCE);
+            }
+            else if(_enemyMove == LEFT)
+            {
+                piece->setPositionX(piece->getPositionX() - ENEMY_MOVE_DISTANCE);
+            }
+        }
+        
+        _elapse = 0.0f;
+    }
 }
