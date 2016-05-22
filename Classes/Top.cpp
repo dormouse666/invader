@@ -504,6 +504,26 @@ void Top::setBlock()
         }
         _piece->setUpPiece(type);
         
+        //一旦、カラータイプで点数わけ
+        int point = 0;
+        switch (type) {
+            case Piece::ColorType::BLUE:
+                point = 10;
+                break;
+                
+            case Piece::ColorType::GREEN:
+                point = 20;
+                break;
+                
+            case Piece::ColorType::RED:
+                point = 30;
+                break;
+                
+            default:
+                break;
+        }
+        _piece->setPoint(point);
+        
         auto pieceSize = _piece->getContentSize();
         _piece->setPosition((_backGround->getPosition().x - _backGround->getContentSize().width / 2) + pieceSize.width * i,
                             _origin.y + _visibleSize.height / 2); //だいぶ適当

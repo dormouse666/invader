@@ -14,6 +14,7 @@ USING_NS_CC;
 Piece::Piece()
 : _pieceSpr(nullptr)
 , _colorType(RED)
+, _point(0)
 {
 }
 
@@ -81,30 +82,4 @@ void Piece::setUpPiece(ColorType type)
         _pieceSpr->setPosition(this->getContentSize().width/2, this->getContentSize().height/2);
         this->addChild(_pieceSpr);
     }
-}
-
-//点数を返す
-int Piece::getPoint()
-{
-    int point = 0;
-    
-    //一旦、カラータイプで点数わけ
-    switch (_colorType) {
-        case BLUE:
-            point = 10;
-            break;
-            
-        case GREEN:
-            point = 20;
-            break;
-        
-        case RED:
-            point = 30;
-            break;
-            
-        default:
-            break;
-    }
-    
-    return point;
 }

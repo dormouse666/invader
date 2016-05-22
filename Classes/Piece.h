@@ -35,10 +35,13 @@ public:
     void setUpPiece(ColorType type);
     
     //点数を返す処理
-    int getPoint();
+    int getPoint(){return _point;};
+    void setPoint(int point){_point = point;};
     
 private:
     ColorType _colorType;
+    int _point;
+    
     cocos2d::Sprite* _pieceSpr;
 };
 
