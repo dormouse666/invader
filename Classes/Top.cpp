@@ -30,7 +30,6 @@ Top::Top()
 : _visibleSize(0,0)
 , _origin(0,0)
 , _backGround(nullptr)
-, _ball(nullptr)
 , _state(NOMAL)
 , _player(nullptr)
 , _isPlayerTap(false)
@@ -53,6 +52,11 @@ Top::Top()
     if(_pieceMap.size() > 0)
     {
         _pieceMap.clear();
+    }
+    
+    if(_ballList.size() > 0)
+    {
+        _ballList.clear();
     }
 }
 
@@ -219,22 +223,18 @@ void Top::entryBall()
 //ボール発射
 void Top::entryBallCallback(Ref* pSender)
 {
-    if(_ball)
-    {
-        return;
-    }
-    
     //ボール作成
-    _ball = Ball::create();
-    _ball->setAnchorPoint(Point(0.5f, 0.5f));
-    _ball->setPosition(_player->getPosition().x,
+    auto ball = Ball::create();
+    ball->setAnchorPoint(Point(0.5f, 0.5f));
+    ball->setPosition(_player->getPosition().x,
                        _origin.y + (_backGround->getPosition().y - _backGround->getContentSize().height / 2));
     
     //進む距離セット まっすぐ進めるのでYのみ
-    _ball->setVerticalLength(LENGTH);
+    ball->setVerticalLength(LENGTH);
     //_ball->setHorizonLength(LENGTH);
     
-    this->addChild(_ball);
+    _ballList.push_back(ball);
+    this->addChild(ball);
     
     /*
     switch (_state) {
@@ -279,6 +279,7 @@ void Top::entryBallCallback(Ref* pSender)
 //角度1〜2までの間でボールの進む距離をランダムでセット
 void Top::setBallLengthRandom(double degreeA, double degreeB)
 {
+    /*
     if(!_ball)
     {
         return;
@@ -296,6 +297,7 @@ void Top::setBallLengthRandom(double degreeA, double degreeB)
     //x,y セット
     _ball->setVerticalLength(cos(radian)*length);
     _ball->setHorizonLength(sin(radian)*length);
+     */
 }
 
 //update
@@ -313,24 +315,24 @@ void Top::update(float dt)
     //敵動く
     this->enemyMove();
     
-    //ボールがあれば動かす
-    if(!_ball)
+    //ボールがなければreturn
+    if(_ballList.size() <= 0)
     {
         return;
     }
     
-    _ball->setPosition(_ball->getPosition().x + _ball->getHorizonLength(),
-                        _ball->getPosition().y + _ball->getVerticalLength());
+    //あれば動かす
+    for (auto ball: _ballList)
+    {
+        ball->setPosition(ball->getPosition().x + ball->getHorizonLength(),
+                           ball->getPosition().y + ball->getVerticalLength());
+    }
     
     //pieceと衝突したかどうか
     auto isCrash = this->isCrash();
     
-    //衝突してたらボール消す
     if(isCrash)
     {
-        _ball->removeFromParent();
-        _ball = nullptr;
-        
         //crashした結果、敵が0になってたらクリア
         if(_pieceMap.size() <= 0)
         {
@@ -341,11 +343,14 @@ void Top::update(float dt)
     }
 
     //上にぶつかったらボール消す
-    if(_ball->getPosition().y >= topPos + _ball->getContentSize().height/2)
+    for(int i = 0; i < _ballList.size(); i++)
     {
-        _ball->removeFromParent();
-        _ball = nullptr;
-        return;
+        if(_ballList[i]->getPosition().y >= topPos + _ballList[i]->getContentSize().height/2)
+        {
+            _ballList[i]->removeFromParent();
+            _ballList.erase(_ballList.begin() + i);
+            return;
+        }
     }
 }
 
@@ -420,7 +425,7 @@ bool Top::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
         _firstTapPos = location;
         
         //ボールがなければボール出す
-        if(!_ball)
+        //if(!_ball)
         {
             this->entryBallCallback(event);
         }
@@ -545,49 +550,59 @@ void Top::setBlock()
 //衝突したかどうか判定
 bool Top::isCrash()
 {
-    auto ballPos = _ball->getPosition(); //TODO:ballのサイズを勘案
+    bool isCrash = false;
     
-    if(_pieceMap.size() <= 0)
+    if(_pieceMap.size() <= 0
+       || _ballList.size() <= 0)
     {
-        return false;
+        isCrash = false;
     }
     
-    for(int i = 0; i < _pieceMap.size(); i++)
+    for(int i = 0; i < _ballList.size(); i++)
     {
-        auto piecePos = _pieceMap[i]->getParent()->convertToWorldSpace(_pieceMap[i]->getPosition());
-        auto pieceSize = _pieceMap[i]->getContentSize();
+        auto ballPos = _ballList[i]->getPosition(); //TODO:ballのサイズを勘案
         
-        //pieceの左以上右以下かつ、下以上上以下なら衝突
-        if(ballPos.x >= piecePos.x
-           && ballPos.x <= piecePos.x + pieceSize.width
-           && ballPos.y >= piecePos.y
-           && ballPos.y <= piecePos.y + pieceSize.height)
+        for(int k = 0; k < _pieceMap.size(); k++)
         {
-            //点数加算＆更新
-            _score = _score + _pieceMap[i]->getPoint();
-            this->setScore();
+            auto piecePos = _pieceMap[k]->getParent()->convertToWorldSpace(_pieceMap[k]->getPosition());
+            auto pieceSize = _pieceMap[k]->getContentSize();
             
-            //ハイスコア更新
-            if(_score > _highScore)
+            //pieceの左以上右以下かつ、下以上上以下なら衝突
+            if(ballPos.x >= piecePos.x
+               && ballPos.x <= piecePos.x + pieceSize.width
+               && ballPos.y >= piecePos.y
+               && ballPos.y <= piecePos.y + pieceSize.height)
             {
-                _highScore = _score;
-                this->setHighScore();
+                //点数加算＆更新
+                _score = _score + _pieceMap[k]->getPoint();
+                this->setScore();
                 
-                //ユーザ情報も更新
-                _userDefault->setIntegerForKey(HIGH_SCORE_NAME, _highScore);
+                //ハイスコア更新
+                if(_score > _highScore)
+                {
+                    _highScore = _score;
+                    this->setHighScore();
+                    
+                    //ユーザ情報も更新
+                    _userDefault->setIntegerForKey(HIGH_SCORE_NAME, _highScore);
+                }
+                
+                //消す
+                _pieceMap[k]->removeFromParent();
+                _pieceMap.erase(_pieceMap.begin() + k);
+                
+                //ボールも消す
+                _ballList[i]->removeFromParent();
+                _ballList.erase(_ballList.begin() + i);
+                
+                CCLOG("i = %d", i);
+                
+                isCrash = true;
             }
-            
-            //消す
-            _pieceMap[i]->removeFromParent();
-            _pieceMap.erase(_pieceMap.begin() + i);
-            
-            CCLOG("i = %d", i);
-            
-            return true;
         }
     }
     
-    return false;
+    return isCrash;
 }
 
 //GameOver
@@ -597,10 +612,14 @@ void Top::entryGameOver()
     this->unscheduleUpdate();
     
     //ボール消す
-    if(_ball)
+    if(_ballList.size() > 0)
     {
-        _ball->removeFromParent();
-        _ball = nullptr;
+        for(auto ball: _ballList)
+        {
+            ball->removeFromParent();
+            ball = nullptr;
+        }
+        _ballList.clear();
     }
     
     //ゲームオーバーしたよラベル生成
@@ -666,10 +685,14 @@ void Top::reset()
     }
     
     //ボール消す
-    if(_ball)
+    if(_ballList.size() > 0)
     {
-        _ball->removeFromParent();
-        _ball = nullptr;
+        for(auto ball: _ballList)
+        {
+            ball->removeFromParent();
+            ball = nullptr;
+        }
+        _ballList.clear();
     }
     
     //背景消す
@@ -819,10 +842,14 @@ void Top::entryGameClear()
     this->unscheduleUpdate();
     
     //ボール消す
-    if(_ball)
+    if(_ballList.size() > 0)
     {
-        _ball->removeFromParent();
-        _ball = nullptr;
+        for(auto ball: _ballList)
+        {
+            ball->removeFromParent();
+            ball = nullptr;
+        }
+        _ballList.clear();
     }
     
     //ゲームクリアしたよラベル生成

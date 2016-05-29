@@ -93,7 +93,7 @@ private:
     
     cocos2d::Node* _backGround;
     
-    Ball* _ball;
+    std::vector<Ball*> _ballList;
     
     cocos2d::Sprite* _player;
     bool _isPlayerTap;
