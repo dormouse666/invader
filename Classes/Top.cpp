@@ -46,6 +46,7 @@ Top::Top()
 , _elapse(0.0f)
 , _enemyMoveInterval(ENEMY_MOVE_INTERVAL_DEFAULT)
 , _isBump(false)
+, _playerNum(0)
 {
     if(_pieceMap.size() > 0)
     {
@@ -202,6 +203,24 @@ void Top::entryBall()
 //ボール発射
 void Top::entryBallCallback(Ref* pSender)
 {
+    if(_ball)
+    {
+        return;
+    }
+    
+    //ボール作成
+    _ball = Ball::create();
+    _ball->setAnchorPoint(Point(0.5f, 0.5f));
+    _ball->setPosition(_player->getPosition().x,
+                       _origin.y + (_backGround->getPosition().y - _backGround->getContentSize().height / 2));
+    
+    //進む距離セット まっすぐ進めるのでYのみ
+    _ball->setVerticalLength(LENGTH);
+    //_ball->setHorizonLength(LENGTH);
+    
+    this->addChild(_ball);
+    
+    /*
     switch (_state) {
         case NOMAL:
         {
@@ -238,7 +257,7 @@ void Top::entryBallCallback(Ref* pSender)
         default:
             break;
     }
-    
+     */
 }
 
 //角度1〜2までの間でボールの進む距離をランダムでセット
@@ -266,19 +285,8 @@ void Top::setBallLengthRandom(double degreeA, double degreeB)
 //update
 void Top::update(float dt)
 {
-    if(!_ball)
-    {
-        return;
-    }
-    
     //上限
-    auto topPos = _backGround->getPosition().y + _backGround->getContentSize().height/2 - _ball->getContentSize().height/2;
-    //下限
-    auto underPos = _backGround->getPosition().y - _backGround->getContentSize().height/2  + _ball->getContentSize().height/2;
-    //右限
-    auto rightPos = _backGround->getPosition().x + _backGround->getContentSize().width/2  - _ball->getContentSize().width/2;
-    //左限
-    auto leftPos = _backGround->getPosition().x - _backGround->getContentSize().width/2 + _ball->getContentSize().width/2;
+    auto topPos = _backGround->getPosition().y + _backGround->getContentSize().height/2;
     
     //CCLOG("rightPos: %f", rightPos);
     //CCLOG("leftPos: %f", leftPos);
@@ -289,84 +297,32 @@ void Top::update(float dt)
     //敵動く
     this->enemyMove();
     
-    //ボールを動かす
+    //ボールがあれば動かす
+    if(!_ball)
+    {
+        return;
+    }
+    
     _ball->setPosition(_ball->getPosition().x + _ball->getHorizonLength(),
                         _ball->getPosition().y + _ball->getVerticalLength());
     
     //pieceと衝突したかどうか
     auto isCrash = this->isCrash();
     
-    //衝突してたら跳ね返す（雑）
+    //衝突してたらボール消す
     if(isCrash)
     {
-        _ball->setVerticalLength(-(_ball->getVerticalLength()));
-        _ball->setHorizonLength(-(_ball->getHorizonLength()));
+        _ball->removeFromParent();
+        _ball = nullptr;
+        return;
     }
 
-    //上にぶつかった時
-    if(_ball->getPosition().y >= topPos)
+    //上にぶつかったらボール消す
+    if(_ball->getPosition().y >= topPos + _ball->getContentSize().height/2)
     {
-        //ボールの位置を調整
-        _ball->setPositionY(topPos);
-        
-        //上に進んでるなら下向きに
-        if(_ball->getVerticalLength() > 0)
-        {
-            _ball->setVerticalLength(-(_ball->getVerticalLength()));
-        }
-    }
-    
-    //下にぶつかった時
-    if(_ball->getPosition().y <= underPos)
-    {
-        //ボールの位置を調整
-        _ball->setPositionY(underPos);
-        
-        //playerに当たったら跳ね返す
-        auto playerPos = _player->getParent()->convertToWorldSpace(_player->getPosition());
-        auto right = playerPos.x + _player->getContentSize().width/2;  //右
-        auto left = playerPos.x - _player->getContentSize().width/2;   //左
-        if((right >= _ball->getPosition().x && left <= _ball->getPosition().x))
-        {
-            //下に進んでるなら上向きに
-            if(_ball->getVerticalLength() < 0)
-            {
-                _ball->setVerticalLength(-(_ball->getVerticalLength()));
-            }
-        }
-        else
-        {
-            //ゲームオーバー
-            this->entryGameOver();
-            
-            return;
-        }
-    }
-    
-    //右にぶつかった時
-    if(_ball->getPosition().x >= rightPos)
-    {
-        //ボールの位置を調整
-        _ball->setPositionX(rightPos);
-        
-        //右に進んでるなら左向きに
-        if(_ball->getHorizonLength() > 0)
-        {
-            _ball->setHorizonLength(-(_ball->getHorizonLength()));
-        }
-    }
-    
-    //左にぶつかった時
-    if(_ball->getPosition().x <= leftPos)
-    {
-        //ボールの位置を調整
-        _ball->setPositionX(leftPos);
-        
-        //左に進んでるなら右向きに
-        if(_ball->getHorizonLength() < 0)
-        {
-            _ball->setHorizonLength(-(_ball->getHorizonLength()));
-        }
+        _ball->removeFromParent();
+        _ball = nullptr;
+        return;
     }
 }
 
@@ -396,6 +352,9 @@ void Top::setPlayer()
     //dispatcherに登録
     auto dispatcher = Director::getInstance()->getEventDispatcher();
     dispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+    
+    //残機設定
+    _playerNum = 5;
 }
 
 //playerをタップしてるかどうか
@@ -614,11 +573,11 @@ void Top::entryGameOver()
     //updateを止める
     this->unscheduleUpdate();
     
-    //ボール消したい気もする
+    //ボール消す
     if(_ball)
     {
-        //_ball->removeFromParent();
-        //_ball = nullptr;
+        _ball->removeFromParent();
+        _ball = nullptr;
     }
     
     //ゲームオーバーしたよラベル生成
@@ -737,11 +696,11 @@ void Top::setHighScore()
 void Top::enemyMove()
 {
     //右限 TODO:ちょい多くなってきたのでどっかで共通化
-    auto rightPos = _backGround->getPosition().x + _backGround->getContentSize().width/2  - _ball->getContentSize().width/2;
+    auto rightPos = _backGround->getPosition().x + _backGround->getContentSize().width/2;
     //左限
-    auto leftPos = _backGround->getPosition().x - _backGround->getContentSize().width/2 + _ball->getContentSize().width/2;
+    auto leftPos = _backGround->getPosition().x - _backGround->getContentSize().width/2;
     //下限
-    auto underPos = _backGround->getPosition().y - _backGround->getContentSize().height/2  + _ball->getContentSize().height/2;
+    auto underPos = _backGround->getPosition().y - _backGround->getContentSize().height/2;
     
     //経過時間がインターバル超えてたら敵動かす
     if (_elapse >= _enemyMoveInterval)

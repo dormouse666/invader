@@ -91,6 +91,7 @@ private:
     cocos2d::Sprite* _player;
     bool _isPlayerTap;
     cocos2d::Vec2 _firstTapPos;
+    int _playerNum;
     
     Piece* _piece;
     std::vector<Piece*> _pieceMap;
