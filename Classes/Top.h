@@ -117,6 +117,9 @@ private:
     //敵の動くタイミング制御
     float _elapse;
     float _enemyMoveInterval;
+    
+    //敵が端にぶつかったか
+    bool _isBump;
 };
 
 #endif /* defined(__breakout__Top__) */

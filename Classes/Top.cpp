@@ -19,7 +19,7 @@ namespace  {
     static const char* PLAYER_IMG_NAME = "images/player.png";
     static const char* HIGH_SCORE_NAME = "highScore";
     static const float ENEMY_MOVE_INTERVAL_DEFAULT = 1.0f;
-    static const int ENEMY_MOVE_DISTANCE = 3;
+    static const int ENEMY_MOVE_DISTANCE = 8;
     static const float ENEMY_WIDTH = 10.0f;
 }
 
@@ -45,6 +45,7 @@ Top::Top()
 , _enemyMove(RIGHT)
 , _elapse(0.0f)
 , _enemyMoveInterval(ENEMY_MOVE_INTERVAL_DEFAULT)
+, _isBump(false)
 {
     if(_pieceMap.size() > 0)
     {
@@ -224,13 +225,13 @@ void Top::entryBallCallback(Ref* pSender)
             
             break;
         }
-        case PLAYING:  //今ここにはこない
+        case PLAYING:
         {
             //ボール消す
-            _ball->removeFromParent();
-            _ball = nullptr;
+            //_ball->removeFromParent();
+            ///_ball = nullptr;
             
-            _state = NOMAL; //state戻す
+            //_state = NOMAL; //state戻す
             
             break;
         }
@@ -335,11 +336,6 @@ void Top::update(float dt)
         }
         else
         {
-            //ボール消す
-            _ball->removeFromParent();
-            _ball = nullptr;
-            _state = NOMAL; //state戻す
-            
             //ゲームオーバー
             this->entryGameOver();
             
@@ -548,7 +544,7 @@ void Top::setBlock()
         
         auto pieceSize = _piece->getContentSize();
         _piece->setPosition((_backGround->getPosition().x - _backGround->getContentSize().width / 2) + ENEMY_WIDTH * i + i*5, //ちょっと隙間開ける(5)
-                            _origin.y + _visibleSize.height / 2); //だいぶ適当
+                            _origin.y + _visibleSize.height / 3); //だいぶ適当
         
         //マップに入れる
         _pieceMap.push_back(_piece);
@@ -615,6 +611,16 @@ bool Top::isCrash()
 //GameOver
 void Top::entryGameOver()
 {
+    //updateを止める
+    this->unscheduleUpdate();
+    
+    //ボール消したい気もする
+    if(_ball)
+    {
+        //_ball->removeFromParent();
+        //_ball = nullptr;
+    }
+    
     //ゲームオーバーしたよラベル生成
     _gameOverLabel = Label::createWithSystemFont("Game Over", "HiraKakuProN-W6", 30);
     _gameOverLabel->setPosition(Point(_origin.x + _visibleSize.width / 2, _origin.y + _visibleSize.height / 2));
@@ -734,10 +740,13 @@ void Top::enemyMove()
     auto rightPos = _backGround->getPosition().x + _backGround->getContentSize().width/2  - _ball->getContentSize().width/2;
     //左限
     auto leftPos = _backGround->getPosition().x - _backGround->getContentSize().width/2 + _ball->getContentSize().width/2;
+    //下限
+    auto underPos = _backGround->getPosition().y - _backGround->getContentSize().height/2  + _ball->getContentSize().height/2;
     
     //経過時間がインターバル超えてたら敵動かす
     if (_elapse >= _enemyMoveInterval)
     {
+        //限界判定
         for(auto piece : _pieceMap)
         {
             if (_enemyMove == RIGHT)
@@ -746,6 +755,7 @@ void Top::enemyMove()
                 if(rightPos < piece->getPositionX() + piece->getContentSize().width + ENEMY_MOVE_DISTANCE)
                 {
                     _enemyMove = LEFT;
+                    _isBump = true;
                     break;
                 }
             }
@@ -755,6 +765,7 @@ void Top::enemyMove()
                 if(leftPos > piece->getPositionX() - ENEMY_MOVE_DISTANCE)
                 {
                     _enemyMove = RIGHT;
+                    _isBump = true;
                     break;
                 }
             }
@@ -763,13 +774,29 @@ void Top::enemyMove()
         //雑に動かす
         for(auto piece : _pieceMap)
         {
-            if (_enemyMove == RIGHT)
+            //端にぶつかってたら前に移動
+            if(_isBump)
             {
-                piece->setPositionX(piece->getPositionX() + ENEMY_MOVE_DISTANCE);
+                //下限界に行ってたらgameOver
+                if(underPos > piece->getPositionY() - ENEMY_MOVE_DISTANCE)
+                {
+                    this->entryGameOver();
+                    break;
+                }
+                
+                piece->setPositionY(piece->getPositionY() - ENEMY_MOVE_DISTANCE);
             }
-            else if(_enemyMove == LEFT)
+            else
             {
-                piece->setPositionX(piece->getPositionX() - ENEMY_MOVE_DISTANCE);
+                //左右
+                if (_enemyMove == RIGHT)
+                {
+                    piece->setPositionX(piece->getPositionX() + ENEMY_MOVE_DISTANCE);
+                }
+                else if(_enemyMove == LEFT)
+                {
+                    piece->setPositionX(piece->getPositionX() - ENEMY_MOVE_DISTANCE);
+                }
             }
             
             //見た目も変えるぞ
@@ -788,5 +815,6 @@ void Top::enemyMove()
         }
         
         _elapse = 0.0f;
+        _isBump = false;
     }
 }
