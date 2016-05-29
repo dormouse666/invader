@@ -10,6 +10,15 @@
 
 USING_NS_CC;
 
+namespace  {
+    static const char* IMG_RED_HANDS_UP = "images/invader_red_1.png";
+    static const char* IMG_RED_HANDS_DOWN = "images/invader_red_2.png";
+    static const char* IMG_BLUE_HANDS_UP = "images/invader_blue_1.png";
+    static const char* IMG_BLUE_HANDS_DOWN = "images/invader_blue_2.png";
+    static const char* IMG_GREEN_HANDS_UP = "images/invader_green_1.png";
+    static const char* IMG_GREEN_HANDS_DOWN = "images/invader_green_2.png";
+}
+
 //コンストラクタ
 Piece::Piece()
 : _pieceSpr(nullptr)
@@ -61,9 +70,9 @@ void Piece::setUpPiece(ColorType type)
     
     //テーブル化する
     static std::map<ColorType, const char*> imgPathTbl = {
-        {BLUE, "images/block1.png"},
-        {GREEN, "images/block2.png"},
-        {RED, "images/invader_red_1.png"},
+        {BLUE, IMG_BLUE_HANDS_UP},
+        {GREEN, IMG_GREEN_HANDS_UP},
+        {RED, IMG_RED_HANDS_UP},
     };
     
     //要素チェック
@@ -88,39 +97,59 @@ void Piece::setUpPiece(ColorType type)
 //見た目変える
 void Piece::lookChange()
 {
-    //とりあえずREDだけ（雑）
+    //前のスプライト消す
+    if(_pieceSpr)
+    {
+        _pieceSpr->removeFromParent();
+        _pieceSpr = nullptr;
+    }
+
+    //スプライト作る
     switch (_colorType) {
         case BLUE:
-        case GREEN:
-            break;
-        case RED:
-            //前のスプライト消す
-            if(_pieceSpr)
-            {
-                _pieceSpr->removeFromParent();
-                _pieceSpr = nullptr;
-            }
-            //スプライト作る
             if(_lookState == HANDS_UP)
             {
-                _pieceSpr = Sprite::create("images/invader_red_1.png");
+                _pieceSpr = Sprite::create(IMG_BLUE_HANDS_UP);
             }
             else if(_lookState == HANDS_DOWN)
             {
-                _pieceSpr = Sprite::create("images/invader_red_2.png");
-            }
-            
-            if(_pieceSpr)
-            {
-                this->setContentSize(_pieceSpr->getContentSize()); //piece自体の大きさを合わせる
-                
-                //pieceNodeの真ん中にsprを置く
-                _pieceSpr->setAnchorPoint(Point(0.5f, 0.5f));
-                _pieceSpr->setPosition(this->getContentSize().width/2, this->getContentSize().height/2);
-                this->addChild(_pieceSpr);
+                _pieceSpr = Sprite::create(IMG_BLUE_HANDS_DOWN);
             }
             break;
+            
+        case GREEN:
+            if(_lookState == HANDS_UP)
+            {
+                _pieceSpr = Sprite::create(IMG_GREEN_HANDS_UP);
+            }
+            else if(_lookState == HANDS_DOWN)
+            {
+                _pieceSpr = Sprite::create(IMG_GREEN_HANDS_DOWN);
+            }
+            break;
+            
+        case RED:
+            if(_lookState == HANDS_UP)
+            {
+                _pieceSpr = Sprite::create(IMG_RED_HANDS_UP);
+            }
+            else if(_lookState == HANDS_DOWN)
+            {
+                _pieceSpr = Sprite::create(IMG_RED_HANDS_DOWN);
+            }
+            break;
+            
         default:
             break;
+    }
+    
+    if(_pieceSpr)
+    {
+        this->setContentSize(_pieceSpr->getContentSize()); //piece自体の大きさを合わせる
+        
+        //pieceNodeの真ん中にsprを置く
+        _pieceSpr->setAnchorPoint(Point(0.5f, 0.5f));
+        _pieceSpr->setPosition(this->getContentSize().width/2, this->getContentSize().height/2);
+        this->addChild(_pieceSpr);
     }
 }
