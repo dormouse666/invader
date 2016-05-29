@@ -36,7 +36,9 @@ Top::Top()
 , _isPlayerTap(false)
 , _firstTapPos(0,0)
 , _piece(nullptr)
+, _gameStartLabel(nullptr)
 , _gameOverLabel(nullptr)
+, _gameClearLabel(nullptr)
 , _score(0)
 , _scoreLabel(nullptr)
 , _highScore(0)
@@ -158,13 +160,27 @@ void Top::onEnter()
     //player
     this->setPlayer();
     
-    //update
-    this->scheduleUpdate();
+    //スタートラベル出す
+    this->entryGameStart();
 }
 
 void Top::onExit()
 {
     Layer::onExit();
+}
+
+//ゲームスタート
+void Top::startGame()
+{
+    //update
+    this->scheduleUpdate();
+    
+    //ラベル消す
+    if(_gameStartLabel)
+    {
+        _gameStartLabel->removeFromParent();
+        _gameStartLabel = nullptr;
+    };
 }
 
 // Homeに戻るボタン
@@ -314,6 +330,13 @@ void Top::update(float dt)
     {
         _ball->removeFromParent();
         _ball = nullptr;
+        
+        //crashした結果、敵が0になってたらクリア
+        if(_pieceMap.size() <= 0)
+        {
+            this->entryGameClear();
+        }
+        
         return;
     }
 
@@ -581,7 +604,7 @@ void Top::entryGameOver()
     }
     
     //ゲームオーバーしたよラベル生成
-    _gameOverLabel = Label::createWithSystemFont("Game Over", "HiraKakuProN-W6", 30);
+    _gameOverLabel = Label::createWithSystemFont("Game Over", "HiraKakuProN-W6", 25);
     _gameOverLabel->setPosition(Point(_origin.x + _visibleSize.width / 2, _origin.y + _visibleSize.height / 2));
     
     //ラベルにタッチイベント付ける
@@ -614,10 +637,21 @@ void Top::entryGameOver()
 //リセット
 void Top::reset()
 {
+    //ラベル類を消す
+    if(_gameStartLabel)
+    {
+        _gameStartLabel->removeFromParent();
+        _gameStartLabel = nullptr;
+    };
     if(_gameOverLabel)
     {
         _gameOverLabel->removeFromParent();
         _gameOverLabel = nullptr;
+    };
+    if(_gameClearLabel)
+    {
+        _gameClearLabel->removeFromParent();
+        _gameClearLabel = nullptr;
     };
     
     //ブロック消す
@@ -776,4 +810,66 @@ void Top::enemyMove()
         _elapse = 0.0f;
         _isBump = false;
     }
+}
+
+//ゲームクリア
+void Top::entryGameClear()
+{
+    //updateを止める
+    this->unscheduleUpdate();
+    
+    //ボール消す
+    if(_ball)
+    {
+        _ball->removeFromParent();
+        _ball = nullptr;
+    }
+    
+    //ゲームクリアしたよラベル生成
+    _gameClearLabel = Label::createWithSystemFont("Game Clear!!", "HiraKakuProN-W6", 25);
+    _gameClearLabel->setPosition(Point(_origin.x + _visibleSize.width / 2, _origin.y + _visibleSize.height / 2));
+    
+    //ラベルにタッチイベント付ける
+    auto listener = EventListenerTouchOneByOne::create();
+    listener->onTouchBegan     = [this] (Touch* touch, Event* event)
+    {
+        return true;
+    };
+    listener->onTouchMoved     = [ ] (Touch* touch, Event* event) {  };
+    listener->onTouchEnded     = [this] (Touch* touch, Event* event)
+    {
+        //状態リセット
+        this->reset();
+    };
+    listener->onTouchCancelled = listener->onTouchEnded;
+    this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, _gameClearLabel);
+    
+    //追加
+    this->addChild(_gameClearLabel);
+}
+
+//ゲームスタート
+void Top::entryGameStart()
+{
+    //ラベル生成
+    _gameStartLabel = Label::createWithSystemFont("Game Start", "HiraKakuProN-W6", 25);
+    _gameStartLabel->setPosition(Point(_origin.x + _visibleSize.width / 2, _origin.y + _visibleSize.height / 2));
+    
+    //ラベルにタッチイベント付ける
+    auto listener = EventListenerTouchOneByOne::create();
+    listener->onTouchBegan     = [this] (Touch* touch, Event* event)
+    {
+        return true;
+    };
+    listener->onTouchMoved     = [ ] (Touch* touch, Event* event) {  };
+    listener->onTouchEnded     = [this] (Touch* touch, Event* event)
+    {
+        //スタート
+        this->startGame();
+    };
+    listener->onTouchCancelled = listener->onTouchEnded;
+    this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, _gameStartLabel);
+    
+    //追加
+    this->addChild(_gameStartLabel);
 }

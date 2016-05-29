@@ -59,9 +59,16 @@ public:
     //piece
     void setBlock();
     
+    //start
+    void startGame();
+    void entryGameStart();
+    
     //gameOver
     void entryGameOver();
     void reset();
+    
+    //クリア
+    void entryGameClear();
     
 public:
     //角度A〜Bまでの間でボールの進む距離をランダムでセット
@@ -96,7 +103,9 @@ private:
     Piece* _piece;
     std::vector<Piece*> _pieceMap;
     
+    cocos2d::Label* _gameStartLabel;
     cocos2d::Label* _gameOverLabel;
+    cocos2d::Label* _gameClearLabel;
     
     //点数
     int _score;
