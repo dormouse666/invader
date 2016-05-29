@@ -349,7 +349,6 @@ void Top::update(float dt)
         {
             _ballList[i]->removeFromParent();
             _ballList.erase(_ballList.begin() + i);
-            return;
         }
     }
 }
@@ -485,7 +484,7 @@ void Top::onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *event)
     _isPlayerTap = false;
 }
 
-//block
+//敵のかたまり
 void Top::setBlock()
 {
     if(_piece)
