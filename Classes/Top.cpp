@@ -506,7 +506,7 @@ void Top::setBlock()
     }
     
     //ブロック作成（仮）
-    for(int i = 0; i < 16; i++)
+    for(int i = 0; i < 40; i++)
     {
         _piece = Piece::create();
         
@@ -541,20 +541,21 @@ void Top::setBlock()
         }
         _piece->setPoint(point);
         
-        //敵の配置　だいぶ適当
+        //敵の配置
         auto pieceSize = _piece->getContentSize();
         
         //横
         auto x = (_backGround->getPosition().x - _backGround->getContentSize().width / 2) + ENEMY_WIDTH * i + i*5; //ちょっと隙間開ける(5)
         //縦
-        auto y = _origin.y + _visibleSize.height / 3;
+        auto y = _origin.y + _visibleSize.height * 0.7;
         
-        //二段目
+        //二段目以降
         if(i >= 8)
         {
-            int k = i - 8;
-            x = (_backGround->getPosition().x - _backGround->getContentSize().width / 2) + ENEMY_WIDTH * k + k*5;
-            y =  y + pieceSize.height;
+            int row = i / 8; //何列目か(1少ない)
+            int column = i % 8; //左から何個目か
+            x = (_backGround->getPosition().x - _backGround->getContentSize().width / 2) + (ENEMY_WIDTH * column) + (column * 5);
+            y =  y + pieceSize.height * row;
         }
         
         _piece->setPosition(x, y);
