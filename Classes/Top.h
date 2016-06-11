@@ -77,6 +77,9 @@ public:
     //自分の弾と敵が衝突したかどうか判定
     bool isCrash();
     
+    //自分の弾と敵の弾が衝突したかどうか判定
+    bool isCrashBall();
+    
     //敵の弾と自分が衝突したかどうか判定
     bool isCrashPlayer();
 

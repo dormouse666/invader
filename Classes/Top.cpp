@@ -328,6 +328,9 @@ void Top::update(float dt)
         this->entryGameOver();
     }
     
+    //ボール同士がぶつかったかどうか
+    this->isCrashBall();
+    
     //ボールがなければreturn
     if(_ballList.size() <= 0)
     {
@@ -588,7 +591,8 @@ bool Top::isCrash()
     //自分のボールが敵に当たったか
     for(int i = 0; i < _ballList.size(); i++)
     {
-        auto ballPos = _ballList[i]->getPosition(); //TODO:ballのサイズを勘案
+        auto ballPos = _ballList[i]->getPosition();
+        auto ballSize = _ballList[i]->getContentSize();
         
         for(int k = 0; k < _pieceMap.size(); k++)
         {
@@ -596,10 +600,10 @@ bool Top::isCrash()
             auto pieceSize = _pieceMap[k]->getContentSize();
             
             //pieceの左以上右以下かつ、下以上上以下なら衝突
-            if(ballPos.x >= piecePos.x
-               && ballPos.x <= piecePos.x + pieceSize.width
-               && ballPos.y >= piecePos.y
-               && ballPos.y <= piecePos.y + pieceSize.height)
+            if(ballPos.x - ballSize.width / 2 >= piecePos.x
+               && ballPos.x + ballSize.width / 2 <= piecePos.x + pieceSize.width
+               && ballPos.y - ballSize.height / 2 >= piecePos.y
+               && ballPos.y + ballSize.height / 2 <= piecePos.y + pieceSize.height)
             {
                 //点数加算＆更新
                 _score = _score + _pieceMap[k]->getPoint();
@@ -623,13 +627,53 @@ bool Top::isCrash()
                 _ballList[i]->removeFromParent();
                 _ballList.erase(_ballList.begin() + i);
                 
-                CCLOG("i = %d", i);
+                isCrash = true;
+            }
+        }
+    }
+    return isCrash;
+}
+
+//自分の弾と敵の弾が衝突したかどうか判定
+bool Top::isCrashBall()
+{
+    bool isCrash = false;
+    
+    if(_ballList.size() <= 0
+       || _enemyBallList.size() <= 0)
+    {
+        return false;
+    }
+    
+    for(int i = 0; i < _enemyBallList.size(); i++)
+    {
+        auto enemyBallPos = _enemyBallList[i]->getPosition();
+        auto enemyBallSize = _enemyBallList[i]->getContentSize();
+        
+        for(int k = 0; k < _ballList.size(); k++)
+        {
+            auto ballPos = _ballList[k]->getPosition();
+            auto ballSize = _ballList[k]->getContentSize();
+            
+            //enemyBallの左以上右以下かつ、下以上上以下なら衝突
+            if(enemyBallPos.x - enemyBallSize.width / 2 >= ballPos.x// - ballSize.width / 2
+               && enemyBallPos.x + enemyBallSize.width / 2 <= ballPos.x// + ballSize.width / 2
+               && enemyBallPos.y - enemyBallSize.height / 2 >= ballPos.y// - ballSize.height / 2
+               && enemyBallPos.y  + enemyBallSize.height / 2 <= ballPos.y// + ballSize.height / 2
+               )
+            {
+                //ボール消す
+                _ballList[k]->removeFromParent();
+                _ballList.erase(_ballList.begin() + k);
+                
+                //敵のボールも消す
+                _enemyBallList[i]->removeFromParent();
+                _enemyBallList.erase(_enemyBallList.begin() + i);
                 
                 isCrash = true;
             }
         }
     }
-    
     return isCrash;
 }
 
