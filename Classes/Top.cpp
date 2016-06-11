@@ -321,6 +321,13 @@ void Top::update(float dt)
     //敵動く
     this->enemyMove();
     
+    //敵の弾が自分に当たったらゲームオーバー
+    bool isCrashPlayer = this->isCrashPlayer();
+    if(isCrashPlayer)
+    {
+        this->entryGameOver();
+    }
+    
     //ボールがなければreturn
     if(_ballList.size() <= 0)
     {
@@ -566,7 +573,7 @@ void Top::setBlock()
     }
 }
 
-//衝突したかどうか判定
+//自分の弾と敵が衝突したかどうか判定
 bool Top::isCrash()
 {
     bool isCrash = false;
@@ -577,6 +584,7 @@ bool Top::isCrash()
         isCrash = false;
     }
     
+    //自分のボールが敵に当たったか
     for(int i = 0; i < _ballList.size(); i++)
     {
         auto ballPos = _ballList[i]->getPosition(); //TODO:ballのサイズを勘案
@@ -621,6 +629,38 @@ bool Top::isCrash()
         }
     }
     
+    return isCrash;
+}
+
+//敵の弾と自分が衝突したかどうか
+bool Top::isCrashPlayer()
+{
+    bool isCrash = false;
+    
+    if(_enemyBallList.size() <= 0)
+    {
+        return false;
+    }
+    
+    //敵のボールが自分に当たったか
+    for(int i = 0; i < _enemyBallList.size(); i++)
+    {
+        auto ballPos = _enemyBallList[i]->getPosition();
+        auto ballSize = _enemyBallList[i]->getContentSize();
+        
+        //playerの左以上右以下かつ、下以上上以下なら衝突
+        auto playerPos = _player->getPosition();
+        auto playerSize = _player->getContentSize();
+        
+        //playerはアンカーが(0.5,1.0)なので
+        if(ballPos.x - ballSize.width/2 >= playerPos.x - playerSize.width/2
+           && ballPos.x + ballSize.width/2 <= playerPos.x + playerSize.width/2
+           //&& ballPos.y + ballSize.height/2 >= playerPos.y - playerSize.height
+           && ballPos.y - ballSize.height/2 - 1 <= playerPos.y) //ちょっとゲタ履かせとく
+        {
+            isCrash = true;
+        }
+    }
     return isCrash;
 }
 

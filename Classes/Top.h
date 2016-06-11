@@ -74,8 +74,11 @@ public:
     //角度A〜Bまでの間でボールの進む距離をランダムでセット
     void setBallLengthRandom(double degreeA, double degreeB);
     
-    //衝突したかどうか判定
+    //自分の弾と敵が衝突したかどうか判定
     bool isCrash();
+    
+    //敵の弾と自分が衝突したかどうか判定
+    bool isCrashPlayer();
 
 private:
     //点数更新
