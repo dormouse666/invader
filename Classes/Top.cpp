@@ -16,6 +16,7 @@ USING_NS_CC;
 namespace  {
     static const double PI = 3.141592653589793;
     static const int LENGTH = 1;
+    static const int LENGTH_ENEMY = -1;
     static const char* PLAYER_IMG_NAME = "images/player.png";
     static const char* HIGH_SCORE_NAME = "highScore";
     static const float ENEMY_MOVE_INTERVAL_DEFAULT = 1.0f;
@@ -57,6 +58,11 @@ Top::Top()
     if(_ballList.size() > 0)
     {
         _ballList.clear();
+    }
+    
+    if(_enemyBallList.size() > 0)
+    {
+        _enemyBallList.clear();
     }
 }
 
@@ -621,6 +627,17 @@ void Top::entryGameOver()
         _ballList.clear();
     }
     
+    //敵の弾も消す
+    if(_enemyBallList.size() > 0)
+    {
+        for(auto ball: _enemyBallList)
+        {
+            ball->removeFromParent();
+            ball = nullptr;
+        }
+        _enemyBallList.clear();
+    }
+    
     //ゲームオーバーしたよラベル生成
     _gameOverLabel = Label::createWithSystemFont("Game Over", "HiraKakuProN-W6", 25);
     _gameOverLabel->setPosition(Point(_origin.x + _visibleSize.width / 2, _origin.y + _visibleSize.height / 2));
@@ -694,6 +711,17 @@ void Top::reset()
         _ballList.clear();
     }
     
+    //敵の弾も消す
+    if(_enemyBallList.size() > 0)
+    {
+        for(auto ball: _enemyBallList)
+        {
+            ball->removeFromParent();
+            ball = nullptr;
+        }
+        _enemyBallList.clear();
+    }
+    
     //背景消す
     if(_backGround)
     {
@@ -757,6 +785,26 @@ void Top::enemyMove()
     auto leftPos = _backGround->getPosition().x - _backGround->getContentSize().width/2;
     //下限
     auto underPos = _backGround->getPosition().y - _backGround->getContentSize().height/2;
+    
+    //敵の弾動かす
+    if(_enemyBallList.size())
+    {
+        for (auto ball: _enemyBallList)
+        {
+            ball->setPosition(ball->getPosition().x + ball->getHorizonLength(),
+                              ball->getPosition().y + ball->getVerticalLength());
+        }
+    }
+    
+    //下にぶつかったら敵の弾消す
+    for(int i = 0; i < _enemyBallList.size(); i++)
+    {
+        if(_enemyBallList[i]->getPosition().y <= underPos + _enemyBallList[i]->getContentSize().height/2)
+        {
+            _enemyBallList[i]->removeFromParent();
+            _enemyBallList.erase(_enemyBallList.begin() + i);
+        }
+    }
     
     //経過時間がインターバル超えてたら敵動かす
     if (_elapse >= _enemyMoveInterval)
@@ -829,6 +877,9 @@ void Top::enemyMove()
             piece->lookChange();
         }
         
+        //敵も弾発射する
+        this->enemyAttack();
+        
         _elapse = 0.0f;
         _isBump = false;
     }
@@ -849,6 +900,17 @@ void Top::entryGameClear()
             ball = nullptr;
         }
         _ballList.clear();
+    }
+    
+    //敵の弾も消す
+    if(_enemyBallList.size() > 0)
+    {
+        for(auto ball: _enemyBallList)
+        {
+            ball->removeFromParent();
+            ball = nullptr;
+        }
+        _enemyBallList.clear();
     }
     
     //ゲームクリアしたよラベル生成
@@ -898,4 +960,47 @@ void Top::entryGameStart()
     
     //追加
     this->addChild(_gameStartLabel);
+}
+
+//敵も弾発射
+void Top::enemyAttack()
+{
+    //どいつが弾飛ばすかランダム
+    std::random_device rnd;
+    std::mt19937 mt(rnd());
+    std::uniform_int_distribution<int> randomIntDistribution(0, static_cast<int>(_pieceMap.size()) - 1);
+    int num = randomIntDistribution(mt);
+    
+    //座標
+    float posX = _pieceMap[num]->getPositionX();
+    float posY = _pieceMap[num]->getPositionY();
+    for(int i = 0; i < _pieceMap.size(); i++)
+    {
+        if(i == num)
+        {
+            continue;
+        }
+        
+        //横が同じで縦が手前側ならそっちが弾出す
+        if(_pieceMap[i]->getPositionX() == posX)
+        {
+            if(_pieceMap[i]->getPositionY() < posY)
+            {
+                num = i;
+            }
+        }
+    }
+    
+    //ボール作成
+    auto ball = Ball::create();
+    ball->setAnchorPoint(Point(0.5f, 0.5f));
+    ball->setPosition(_pieceMap[num]->getPositionX() + _pieceMap[num]->getContentSize().width / 2,
+                      _pieceMap[num]->getPositionY());
+    
+    //進む距離セット まっすぐ進めるのでYのみ
+    ball->setVerticalLength(LENGTH_ENEMY);
+    
+    _enemyBallList.push_back(ball);
+    this->addChild(ball);
+
 }

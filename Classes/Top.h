@@ -84,6 +84,7 @@ private:
     
     //敵動かす
     void enemyMove();
+    void enemyAttack(); //攻撃
 
 private:
     State _state;
@@ -127,6 +128,9 @@ private:
     //敵の動くタイミング制御
     float _elapse;
     float _enemyMoveInterval;
+    
+    //敵の弾リスト
+    std::vector<Ball*> _enemyBallList;
     
     //敵が端にぶつかったか
     bool _isBump;
