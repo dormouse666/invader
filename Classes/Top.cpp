@@ -22,6 +22,8 @@ namespace  {
     static const float ENEMY_MOVE_INTERVAL_DEFAULT = 1.0f;
     static const int ENEMY_MOVE_DISTANCE = 8;
     static const float ENEMY_WIDTH = 10.0f;
+    static const int ENEMY_NUM = 40; //敵の総数
+    static const int ENEMY_ROW_NUM = 8; //横列に何匹置くか
 }
 
 
@@ -513,14 +515,18 @@ void Top::setBlock()
     }
     
     //ブロック作成（仮）
-    for(int i = 0; i < 40; i++)
+    for(int i = 0; i < ENEMY_NUM; i++)
     {
         _piece = Piece::create();
         
         Piece::ColorType type; //色変え（仮）
-        if(i % 2 == 0)
+        if(i % 3 == 0)
         {
             type = Piece::ColorType::BLUE;
+        }
+        else if(i % 3 == 1)
+        {
+            type = Piece::ColorType::GREEN;
         }
         else
         {
@@ -550,20 +556,11 @@ void Top::setBlock()
         
         //敵の配置
         auto pieceSize = _piece->getContentSize();
-        
-        //横
-        auto x = (_backGround->getPosition().x - _backGround->getContentSize().width / 2) + ENEMY_WIDTH * i + i*5; //ちょっと隙間開ける(5)
-        //縦
-        auto y = _origin.y + _visibleSize.height * 0.7;
-        
-        //二段目以降
-        if(i >= 8)
-        {
-            int row = i / 8; //何列目か(1少ない)
-            int column = i % 8; //左から何個目か
-            x = (_backGround->getPosition().x - _backGround->getContentSize().width / 2) + (ENEMY_WIDTH * column) + (column * 5);
-            y =  y + pieceSize.height * row;
-        }
+
+        int row = i / ENEMY_ROW_NUM; //何列目か(1少ない)
+        int column = i % ENEMY_ROW_NUM; //左から何個目か
+        float x = (_backGround->getPosition().x - _backGround->getContentSize().width / 2) + (ENEMY_WIDTH * column) + (column * 5); //ちょっと隙間開ける(5)
+        float y =  _origin.y + (_visibleSize.height * 0.7) + (pieceSize.height * row);
         
         _piece->setPosition(x, y);
         
