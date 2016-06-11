@@ -14,7 +14,7 @@
 USING_NS_CC;
 
 namespace  {
-    static const double PI = 3.141592653589793;
+    //static const double PI = 3.141592653589793;
     static const int LENGTH = 1;
     static const int LENGTH_ENEMY = -1;
     static const char* PLAYER_IMG_NAME = "images/player.png";
