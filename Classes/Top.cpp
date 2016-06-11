@@ -1085,7 +1085,10 @@ void Top::enemyAttack()
         {
             if(_pieceMap[i]->getPositionY() < posY)
             {
-                num = i;
+                if(num > i) //数が小さい方が手前
+                {
+                    num = i;
+                }
             }
         }
     }
