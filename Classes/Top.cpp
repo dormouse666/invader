@@ -34,6 +34,7 @@ Top::Top()
 , _state(NOMAL)
 , _player(nullptr)
 , _isPlayerTap(false)
+, _isPlayerMove(false)
 , _firstTapPos(0,0)
 , _piece(nullptr)
 , _gameStartLabel(nullptr)
@@ -439,12 +440,6 @@ bool Top::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
         //タップ位置保存
         _firstTapPos = location;
         
-        //ボールがなければボール出す
-        //if(!_ball)
-        {
-            this->entryBallCallback(event);
-        }
-        
         return true;
     }
     
@@ -485,6 +480,8 @@ void Top::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event)
             now = leftPos + _player->getContentSize().width/2;
         }
         _player->setPositionX(now); //yは変更しない
+        
+        _isPlayerMove = true;
     }
 }
 
@@ -496,8 +493,15 @@ void Top::onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *event)
         return;
     }
     
+    //ボール出す
+    if(_isPlayerTap && !_isPlayerMove)
+    {
+        this->entryBallCallback(event);
+    }
+    
     //フラグ戻す
     _isPlayerTap = false;
+    _isPlayerMove = false;
 }
 
 //敵のかたまり
