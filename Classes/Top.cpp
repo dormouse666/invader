@@ -646,30 +646,30 @@ bool Top::isCrashBall()
         return false;
     }
     
-    for(int i = 0; i < _enemyBallList.size(); i++)
+    for(int i = 0; i < _ballList.size(); i++)
     {
-        auto enemyBallPos = _enemyBallList[i]->getPosition();
-        auto enemyBallSize = _enemyBallList[i]->getContentSize();
+        auto ballPos = _ballList[i]->getPosition();
+        auto ballSize = _ballList[i]->getContentSize();
         
-        for(int k = 0; k < _ballList.size(); k++)
+        for(int k = 0; k < _enemyBallList.size(); k++)
         {
-            auto ballPos = _ballList[k]->getPosition();
-            auto ballSize = _ballList[k]->getContentSize();
+            auto enemyBallPos = _enemyBallList[k]->getPosition();
+            auto enemyBallSize = _enemyBallList[k]->getContentSize();
             
             //enemyBallの左以上右以下かつ、下以上上以下なら衝突
-            if(enemyBallPos.x - enemyBallSize.width / 2 >= ballPos.x// - ballSize.width / 2
-               && enemyBallPos.x + enemyBallSize.width / 2 <= ballPos.x// + ballSize.width / 2
-               && enemyBallPos.y - enemyBallSize.height / 2 >= ballPos.y// - ballSize.height / 2
-               && enemyBallPos.y  + enemyBallSize.height / 2 <= ballPos.y// + ballSize.height / 2
+            if(ballPos.x /*- ballSize.width / 2*/ >= enemyBallPos.x - enemyBallSize.width / 2
+               && ballPos.x /*+ ballSize.width / 2*/ <= enemyBallPos.x + enemyBallSize.width / 2
+               && ballPos.y /*- ballSize.height / 2*/ >= enemyBallPos.y - enemyBallSize.height / 2
+               && ballPos.y  /*+ ballSize.height / 2*/ <= enemyBallPos.y + enemyBallSize.height / 2
                )
             {
-                //ボール消す
-                _ballList[k]->removeFromParent();
-                _ballList.erase(_ballList.begin() + k);
+                //敵のボール消す
+                _enemyBallList[k]->removeFromParent();
+                _enemyBallList.erase(_enemyBallList.begin() + k);
                 
-                //敵のボールも消す
-                _enemyBallList[i]->removeFromParent();
-                _enemyBallList.erase(_enemyBallList.begin() + i);
+                //自分のボール消す
+                _ballList[i]->removeFromParent();
+                _ballList.erase(_ballList.begin() + i);
                 
                 isCrash = true;
             }
