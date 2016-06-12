@@ -63,5 +63,6 @@ void Ball::setUpball()
     if(_ball)
     {
         this->addChild(_ball);
+        this->setContentSize(_ball->getContentSize());
     }
 }

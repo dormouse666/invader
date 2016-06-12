@@ -601,9 +601,9 @@ bool Top::isCrash()
             auto pieceSize = _pieceMap[k]->getContentSize();
             
             //pieceの左以上右以下かつ、下以上上以下なら衝突
-            if(ballPos.x - ballSize.width / 2 >= piecePos.x
-               && ballPos.x + ballSize.width / 2 <= piecePos.x + pieceSize.width
-               && ballPos.y - ballSize.height / 2 >= piecePos.y
+            if(ballPos.x + ballSize.width / 2 >= piecePos.x
+               && ballPos.x - ballSize.width / 2 <= piecePos.x + pieceSize.width
+               && ballPos.y + ballSize.height / 2 >= piecePos.y
                && ballPos.y + ballSize.height / 2 <= piecePos.y + pieceSize.height)
             {
                 //点数加算＆更新
@@ -656,11 +656,14 @@ bool Top::isCrashBall()
             auto enemyBallPos = _enemyBallList[k]->getPosition();
             auto enemyBallSize = _enemyBallList[k]->getContentSize();
             
-            //enemyBallの左以上右以下かつ、下以上上以下なら衝突
-            if(ballPos.x /*- ballSize.width / 2*/ >= enemyBallPos.x - enemyBallSize.width / 2
-               && ballPos.x /*+ ballSize.width / 2*/ <= enemyBallPos.x + enemyBallSize.width / 2
-               && ballPos.y /*- ballSize.height / 2*/ >= enemyBallPos.y - enemyBallSize.height / 2
-               && ballPos.y  /*+ ballSize.height / 2*/ <= enemyBallPos.y + enemyBallSize.height / 2
+            //ballの左がenemyBallの右以下、
+            //ballの右がenemyBallの左以上、
+            //ballの上がenemyBallの下以上、
+            //ballの上がenemyBallの上以下
+            if(ballPos.x + ballSize.width / 2 >= enemyBallPos.x - enemyBallSize.width //敵弾左(広め)
+               && ballPos.x - ballSize.width / 2 <= enemyBallPos.x + enemyBallSize.width //敵弾右(広め)
+               && ballPos.y + ballSize.height / 2 >= enemyBallPos.y - enemyBallSize.height / 2 //敵弾下
+                && ballPos.y + ballSize.height / 2 <= enemyBallPos.y + enemyBallSize.height / 2  //敵弾上
                )
             {
                 //敵のボール消す
@@ -699,8 +702,8 @@ bool Top::isCrashPlayer()
         auto playerSize = _player->getContentSize();
         
         //playerはアンカーが(0.5,1.0)なので
-        if(ballPos.x - ballSize.width/2 >= playerPos.x - playerSize.width/2
-           && ballPos.x + ballSize.width/2 <= playerPos.x + playerSize.width/2
+        if(ballPos.x + ballSize.width/2 >= playerPos.x - playerSize.width/2
+           && ballPos.x - ballSize.width/2 <= playerPos.x + playerSize.width/2
            //&& ballPos.y + ballSize.height/2 >= playerPos.y - playerSize.height
            && ballPos.y - ballSize.height/2 - 1 <= playerPos.y) //ちょっとゲタ履かせとく
         {
