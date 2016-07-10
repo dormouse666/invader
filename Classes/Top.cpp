@@ -333,18 +333,15 @@ void Top::update(float dt)
     
     //ボール同士がぶつかったかどうか
     this->isCrashBall();
-    
-    //ボールがなければreturn
-    if(_ballList.size() <= 0)
+
+    //ボールがあれば動かす
+    if(_ballList.size() > 0)
     {
-        return;
-    }
-    
-    //あれば動かす
-    for (auto ball: _ballList)
-    {
-        ball->setPosition(ball->getPosition().x + ball->getHorizonLength(),
-                           ball->getPosition().y + ball->getVerticalLength());
+        for (auto ball: _ballList)
+        {
+            ball->setPosition(ball->getPosition().x + ball->getHorizonLength(),
+                              ball->getPosition().y + ball->getVerticalLength());
+        }
     }
     
     //pieceと衝突したかどうか
@@ -362,12 +359,57 @@ void Top::update(float dt)
     }
 
     //上にぶつかったらボール消す
-    for(int i = 0; i < _ballList.size(); i++)
+    if(_ballList.size() > 0)
     {
-        if(_ballList[i]->getPosition().y >= topPos + _ballList[i]->getContentSize().height/2)
+        for(int i = 0; i < _ballList.size(); i++)
         {
-            _ballList[i]->removeFromParent();
-            _ballList.erase(_ballList.begin() + i);
+            if(_ballList[i]->getPosition().y >= topPos + _ballList[i]->getContentSize().height/2)
+            {
+                /*
+                 _ballList[i]->removeFromParent();
+                 _ballList.erase(_ballList.begin() + i);
+                 */
+                
+                //消すフラグ立てる
+                _ballList[i]->setIsLiving(false);
+            }
+        }
+    }
+    
+    //生存チェック、死んでたら消す
+    if(_ballList.size() > 0)
+    {
+        for(int i = 0; i < _ballList.size(); i++)
+        {
+            if(_ballList[i]->getIsLiving() == false)
+            {
+                _ballList[i]->removeFromParent();
+                _ballList.erase(_ballList.begin() + i);
+            }
+        }
+    }
+    
+    if(_pieceMap.size() > 0)
+    {
+        for(int i = 0; i < _pieceMap.size(); i++)
+        {
+            if(_pieceMap[i]->getIsLiving() == false)
+            {
+                _pieceMap[i]->removeFromParent();
+                _pieceMap.erase(_pieceMap.begin() + i);
+            }
+        }
+    }
+    
+    if(_enemyBallList.size() > 0)
+    {
+        for(int i = 0; i < _enemyBallList.size(); i++)
+        {
+            if(_enemyBallList[i]->getIsLiving() == false)
+            {
+                _enemyBallList[i]->removeFromParent();
+                _enemyBallList.erase(_enemyBallList.begin() + i);
+            }
         }
     }
 }
@@ -592,11 +634,21 @@ bool Top::isCrash()
     //自分のボールが敵に当たったか
     for(int i = 0; i < _ballList.size(); i++)
     {
+        if(_ballList[i]->getIsLiving() == false)
+        {
+            break;
+        }
+        
         auto ballPos = _ballList[i]->getPosition();
         auto ballSize = _ballList[i]->getContentSize();
         
         for(int k = 0; k < _pieceMap.size(); k++)
         {
+            if(_pieceMap[k]->getIsLiving() == false)
+            {
+                break;
+            }
+            
             auto piecePos = _pieceMap[k]->getParent()->convertToWorldSpace(_pieceMap[k]->getPosition());
             auto pieceSize = _pieceMap[k]->getContentSize();
             
@@ -620,6 +672,7 @@ bool Top::isCrash()
                     _userDefault->setIntegerForKey(HIGH_SCORE_NAME, _highScore);
                 }
                 
+                /*
                 //消す
                 _pieceMap[k]->removeFromParent();
                 _pieceMap.erase(_pieceMap.begin() + k);
@@ -627,8 +680,17 @@ bool Top::isCrash()
                 //ボールも消す
                 _ballList[i]->removeFromParent();
                 _ballList.erase(_ballList.begin() + i);
+                 */
+                
+                //敵消えるフラグ立てる
+                _pieceMap[k]->setIsLiving(false);
+                
+                //自分のボール消すフラグ立てる
+                _ballList[i]->setIsLiving(false);
                 
                 isCrash = true;
+                
+                break; //1体しか消さない
             }
         }
     }
@@ -648,11 +710,21 @@ bool Top::isCrashBall()
     
     for(int i = 0; i < _ballList.size(); i++)
     {
+        if(_ballList[i]->getIsLiving() == false)
+        {
+            break;
+        }
+        
         auto ballPos = _ballList[i]->getPosition();
         auto ballSize = _ballList[i]->getContentSize();
         
         for(int k = 0; k < _enemyBallList.size(); k++)
         {
+            if(_enemyBallList[k]->getIsLiving() == false)
+            {
+                break;
+            }
+            
             auto enemyBallPos = _enemyBallList[k]->getPosition();
             auto enemyBallSize = _enemyBallList[k]->getContentSize();
             
@@ -666,6 +738,7 @@ bool Top::isCrashBall()
                 && ballPos.y + ballSize.height / 2 <= enemyBallPos.y + enemyBallSize.height / 2  //敵弾上
                )
             {
+                /*
                 //敵のボール消す
                 _enemyBallList[k]->removeFromParent();
                 _enemyBallList.erase(_enemyBallList.begin() + k);
@@ -673,8 +746,17 @@ bool Top::isCrashBall()
                 //自分のボール消す
                 _ballList[i]->removeFromParent();
                 _ballList.erase(_ballList.begin() + i);
+                 */
+                
+                //敵のボール消えるフラグ立てる
+                _enemyBallList[k]->setIsLiving(false);
+                
+                //自分のボール消すフラグ立てる
+                _ballList[i]->setIsLiving(false);
                 
                 isCrash = true;
+                
+                break; //消すのは1つだけ
             }
         }
     }
@@ -694,6 +776,11 @@ bool Top::isCrashPlayer()
     //敵のボールが自分に当たったか
     for(int i = 0; i < _enemyBallList.size(); i++)
     {
+        if(_enemyBallList[i]->getIsLiving() == false)
+        {
+            break;
+        }
+        
         auto ballPos = _enemyBallList[i]->getPosition();
         auto ballSize = _enemyBallList[i]->getContentSize();
         
@@ -760,10 +847,14 @@ void Top::entryGameOver()
         return true;
     };
     listener->onTouchMoved     = [ ] (Touch* touch, Event* event) {  };
-    listener->onTouchEnded     = [this] (Touch* touch, Event* event)
+    listener->onTouchEnded     = [this, listener] (Touch* touch, Event* event)
     {
         //状態リセット
         this->reset();
+        
+        //リスナーをremove
+        //auto dispatcher = Director::getInstance()->getEventDispatcher();
+        //dispatcher->removeEventListener(listener);
     };
     listener->onTouchCancelled = listener->onTouchEnded;
     this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, _gameOverLabel);
@@ -852,10 +943,14 @@ void Top::reset()
 //点数更新
 void Top::setScore()
 {
-    if(_scoreLabel)
+    if(_scoreLabel) //あるなら使う
     {
-        _scoreLabel->removeFromParent();
-        _scoreLabel = nullptr;
+        //_scoreLabel->removeFromParent();
+        //_scoreLabel = nullptr;
+        
+        _scoreLabel->setString(StringUtils::format("Score: %d", _score));
+        
+        return;
     }
     
     _scoreLabel = Label::createWithSystemFont(StringUtils::format("Score: %d", _score), "HiraKakuProN-W6", 10);
@@ -867,10 +962,14 @@ void Top::setScore()
 //ハイスコア更新
 void Top::setHighScore()
 {
-    if(_highScoreLabel)
+    if(_highScoreLabel)  //あるなら使う
     {
-        _highScoreLabel->removeFromParent();
-        _highScoreLabel = nullptr;
+        //_highScoreLabel->removeFromParent();
+        //_highScoreLabel = nullptr;
+        
+        _highScoreLabel->setString(StringUtils::format("HighScore: %d", _highScore));
+        
+        return;
     }
     
     _highScoreLabel = Label::createWithSystemFont(StringUtils::format("HighScore: %d", _highScore), "HiraKakuProN-W6", 10);
@@ -890,7 +989,7 @@ void Top::enemyMove()
     auto underPos = _backGround->getPosition().y - _backGround->getContentSize().height/2;
     
     //敵の弾動かす
-    if(_enemyBallList.size())
+    if(_enemyBallList.size() > 0)
     {
         for (auto ball: _enemyBallList)
         {
@@ -904,8 +1003,12 @@ void Top::enemyMove()
     {
         if(_enemyBallList[i]->getPosition().y <= underPos + _enemyBallList[i]->getContentSize().height/2)
         {
+            /*
             _enemyBallList[i]->removeFromParent();
             _enemyBallList.erase(_enemyBallList.begin() + i);
+             */
+            
+            _enemyBallList[i]->setIsLiving(false);
         }
     }
     

@@ -25,6 +25,7 @@ Piece::Piece()
 , _colorType(RED)
 , _point(0)
 , _lookState(HANDS_UP)
+, _isLiving(true)
 {
 }
 

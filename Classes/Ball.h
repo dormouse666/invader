@@ -33,10 +33,15 @@ public:
     float getVerticalLength(){return _vLength;};
     float getHorizonLength(){return _hLength;};
     
+    //生存
+    void setIsLiving(bool isLiving){_isLiving = isLiving;};
+    bool getIsLiving(){return _isLiving;};
+    
 private:
     cocos2d::Sprite* _ball;
     float _vLength; //vertical
     float _hLength;  //horizon
+    bool _isLiving; //生きてるか
     
 };
 

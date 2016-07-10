@@ -17,6 +17,7 @@ Ball::Ball()
 : _ball(nullptr)
 , _vLength(0.0f)
 , _hLength(0.0f)
+, _isLiving(true)
 {
 }
 

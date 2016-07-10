@@ -48,12 +48,18 @@ public:
     void setLookState(LookState lookState){_lookState = lookState;};
     void lookChange();
     
+    //生存
+    void setIsLiving(bool isLiving){_isLiving = isLiving;};
+    bool getIsLiving(){return _isLiving;};
+    
 private:
     ColorType _colorType;
     int _point;
     LookState _lookState;
     
     cocos2d::Sprite* _pieceSpr;
+    
+    bool _isLiving; //生きてるか
 };
 
 #endif /* Piece_h */
