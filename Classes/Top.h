@@ -83,6 +83,13 @@ public:
     //敵の弾と自分が衝突したかどうか判定
     bool isCrashPlayer();
 
+public:
+    std::vector<Ball*> _ballList;
+    std::vector<Piece*> _pieceMap;
+    
+    //敵の弾リスト
+    std::vector<Ball*> _enemyBallList;
+    
 private:
     //点数更新
     void setScore();
@@ -100,8 +107,6 @@ private:
     
     cocos2d::Node* _backGround;
     
-    std::vector<Ball*> _ballList;
-    
     cocos2d::Sprite* _player;
     bool _isPlayerTap;
     cocos2d::Vec2 _firstTapPos;
@@ -109,7 +114,6 @@ private:
     bool _isPlayerMove;
     
     Piece* _piece;
-    std::vector<Piece*> _pieceMap;
     
     cocos2d::Label* _gameStartLabel;
     cocos2d::Label* _gameOverLabel;
@@ -135,9 +139,6 @@ private:
     //敵の動くタイミング制御
     float _elapse;
     float _enemyMoveInterval;
-    
-    //敵の弾リスト
-    std::vector<Ball*> _enemyBallList;
     
     //敵が端にぶつかったか
     bool _isBump;

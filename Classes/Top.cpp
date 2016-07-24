@@ -10,6 +10,7 @@
 #include "Ball.h"
 #include "Piece.h"
 #include <math.h>
+#include "GameLogic.h"
 
 USING_NS_CC;
 
@@ -325,14 +326,14 @@ void Top::update(float dt)
     this->enemyMove();
     
     //敵の弾が自分に当たったらゲームオーバー
-    bool isCrashPlayer = this->isCrashPlayer();
+    bool isCrashPlayer = GameLogic::isCrashPlayer(_enemyBallList, _player);
     if(isCrashPlayer)
     {
         this->entryGameOver();
     }
     
     //ボール同士がぶつかったかどうか
-    this->isCrashBall();
+    GameLogic::isCrashBall(_ballList, _enemyBallList);
 
     //ボールがあれば動かす
     if(_ballList.size() > 0)
@@ -345,19 +346,24 @@ void Top::update(float dt)
     }
     
     //pieceと衝突したかどうか
-    auto isCrash = this->isCrash();
-    
-    if(isCrash)
+    int getPoint = GameLogic::isCrashEnemy(_pieceMap, _ballList);
+    if(getPoint > 0)
     {
-        //crashした結果、敵が0になってたらクリア
-        if(_pieceMap.size() <= 0)
-        {
-            this->entryGameClear();
-        }
+        //点数加算＆更新
+        _score = _score + getPoint;
+        this->setScore();
         
-        return;
+        //ハイスコア更新
+        if(_score > _highScore)
+        {
+            _highScore = _score;
+            this->setHighScore();
+            
+            //ユーザ情報も更新
+            _userDefault->setIntegerForKey(HIGH_SCORE_NAME, _highScore);
+        }
     }
-
+    
     //上にぶつかったらボール消す
     if(_ballList.size() > 0)
     {
@@ -365,11 +371,6 @@ void Top::update(float dt)
         {
             if(_ballList[i]->getPosition().y >= topPos + _ballList[i]->getContentSize().height/2)
             {
-                /*
-                 _ballList[i]->removeFromParent();
-                 _ballList.erase(_ballList.begin() + i);
-                 */
-                
                 //消すフラグ立てる
                 _ballList[i]->setIsLiving(false);
             }
@@ -399,6 +400,13 @@ void Top::update(float dt)
                 _pieceMap.erase(_pieceMap.begin() + i);
             }
         }
+    }
+    
+    //敵が0になってたらクリア
+    if(_pieceMap.size() <= 0)
+    {
+        this->entryGameClear();
+        return;
     }
     
     if(_enemyBallList.size() > 0)
@@ -834,6 +842,7 @@ void Top::entryGameOver()
     
     //ラベルにタッチイベント付ける
     auto listener = EventListenerTouchOneByOne::create();
+    listener->retain();
     listener->onTouchBegan     = [this] (Touch* touch, Event* event)
     {
         /* ラベルタッチだけに反応させたい場合はこう
@@ -853,8 +862,8 @@ void Top::entryGameOver()
         this->reset();
         
         //リスナーをremove
-        //auto dispatcher = Director::getInstance()->getEventDispatcher();
-        //dispatcher->removeEventListener(listener);
+        auto dispatcher = Director::getInstance()->getEventDispatcher();
+        dispatcher->removeEventListener(listener);
     };
     listener->onTouchCancelled = listener->onTouchEnded;
     this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, _gameOverLabel);
@@ -1125,15 +1134,20 @@ void Top::entryGameClear()
     
     //ラベルにタッチイベント付ける
     auto listener = EventListenerTouchOneByOne::create();
+    listener->retain();
     listener->onTouchBegan     = [this] (Touch* touch, Event* event)
     {
         return true;
     };
     listener->onTouchMoved     = [ ] (Touch* touch, Event* event) {  };
-    listener->onTouchEnded     = [this] (Touch* touch, Event* event)
+    listener->onTouchEnded     = [this, listener] (Touch* touch, Event* event)
     {
         //状態リセット
         this->reset();
+        
+        //リスナーをremove
+        auto dispatcher = Director::getInstance()->getEventDispatcher();
+        dispatcher->removeEventListener(listener);
     };
     listener->onTouchCancelled = listener->onTouchEnded;
     this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, _gameClearLabel);
@@ -1151,15 +1165,20 @@ void Top::entryGameStart()
     
     //ラベルにタッチイベント付ける
     auto listener = EventListenerTouchOneByOne::create();
+    listener->retain();
     listener->onTouchBegan     = [this] (Touch* touch, Event* event)
     {
         return true;
     };
     listener->onTouchMoved     = [ ] (Touch* touch, Event* event) {  };
-    listener->onTouchEnded     = [this] (Touch* touch, Event* event)
+    listener->onTouchEnded     = [this, listener] (Touch* touch, Event* event)
     {
         //スタート
         this->startGame();
+        
+        //リスナーをremove
+        auto dispatcher = Director::getInstance()->getEventDispatcher();
+        dispatcher->removeEventListener(listener);
     };
     listener->onTouchCancelled = listener->onTouchEnded;
     this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, _gameStartLabel);

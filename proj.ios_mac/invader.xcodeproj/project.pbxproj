@@ -65,6 +65,7 @@
 		D6B0611B1803AB670077942B /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6B0611A1803AB670077942B /* CoreMotion.framework */; };
 		ED545A7C1B68A1F400C3958E /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED545A7B1B68A1F400C3958E /* libiconv.dylib */; };
 		ED545A7E1B68A1FA00C3958E /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ED545A7D1B68A1FA00C3958E /* libiconv.dylib */; };
+		F81104341D3FC60D00C9B337 /* GameLogic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F81104321D3FC60D00C9B337 /* GameLogic.cpp */; };
 		F8AB58301CE8B400003666D0 /* AppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8AB58261CE8B400003666D0 /* AppDelegate.cpp */; };
 		F8AB58311CE8B400003666D0 /* Ball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8AB58281CE8B400003666D0 /* Ball.cpp */; };
 		F8AB58321CE8B400003666D0 /* HelloWorldScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F8AB582A1CE8B400003666D0 /* HelloWorldScene.cpp */; };
@@ -161,6 +162,8 @@
 		D6B0611A1803AB670077942B /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk/System/Library/Frameworks/CoreMotion.framework; sourceTree = DEVELOPER_DIR; };
 		ED545A7B1B68A1F400C3958E /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.4.sdk/usr/lib/libiconv.dylib; sourceTree = DEVELOPER_DIR; };
 		ED545A7D1B68A1FA00C3958E /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
+		F81104321D3FC60D00C9B337 /* GameLogic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameLogic.cpp; sourceTree = "<group>"; };
+		F81104331D3FC60D00C9B337 /* GameLogic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameLogic.h; sourceTree = "<group>"; };
 		F8AB58261CE8B400003666D0 /* AppDelegate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppDelegate.cpp; sourceTree = "<group>"; };
 		F8AB58271CE8B400003666D0 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		F8AB58281CE8B400003666D0 /* Ball.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ball.cpp; sourceTree = "<group>"; };
@@ -317,6 +320,8 @@
 				F8AB582D1CE8B400003666D0 /* Piece.h */,
 				F8AB582E1CE8B400003666D0 /* Top.cpp */,
 				F8AB582F1CE8B400003666D0 /* Top.h */,
+				F81104321D3FC60D00C9B337 /* GameLogic.cpp */,
+				F81104331D3FC60D00C9B337 /* GameLogic.h */,
 			);
 			name = Classes;
 			path = ../Classes;
@@ -517,6 +522,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F8AB58301CE8B400003666D0 /* AppDelegate.cpp in Sources */,
+				F81104341D3FC60D00C9B337 /* GameLogic.cpp in Sources */,
 				F8AB58331CE8B400003666D0 /* Piece.cpp in Sources */,
 				503AE10017EB989F00D1A890 /* AppController.mm in Sources */,
 				F8AB58341CE8B400003666D0 /* Top.cpp in Sources */,
